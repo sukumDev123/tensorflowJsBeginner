@@ -1,39 +1,25 @@
-import * as tf from '@tensorflow/tfjs'
-import express from 'express'
-import http from 'http'
-const app = express()
-function random(start , end){
-    return Math.random() * end  + start;
-}
-let values = []
-for(let i = 0 ; i < 30 ; i++) {
-    values[i] =random(0,100)
-}
-const shape = [2,5,3]
-const tense = tf.tensor3d(values,shape,'int32')
-const vtense = tf.variable(tense)
-console.log(vtense)
-
-
-
-
-
-
-
-
-
-
+import express from 'express';
+import path from 'path';
+import socket from 'socket.io';
+const app = express();
 
 
 app.set('views', './');
 app.set('view engine', 'ejs');
 app.use(express.static('./'));
-app.get('/' , (req,res)  => {
-    res.render('views/index' , {
-        tfShow : ''
-    })
-
+app.get('/' , (req,res) => {
+    res.render('./views/index' , {
+        test : 'test'
+    } )
 })
-http.createServer(app).listen(3000)
 
+let server = app.listen(3000);
+const io = socket(server);
+async function  newConnection(socket) {
+    console.log('socker connected : ' + socket.id)
+    socket.on('mouse' , data => {
+        socket.broadcast.emit('mouse',data)
+    })
+}
 
+io.sockets.on('connection', newConnection)
